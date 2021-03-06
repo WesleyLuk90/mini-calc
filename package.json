@@ -16,6 +16,7 @@
     "@types/react-dom": "^17.0.0",
     "bootstrap": "^4.6.0",
     "eslint-config-react-app": "^6.0.0",
+    "fp-ts": "^2.9.5",
     "pegjs": "^0.10.0",
     "react": "^17.0.1",
     "react-bootstrap": "^1.5.1",
