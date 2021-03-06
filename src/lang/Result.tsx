@@ -1,14 +1,9 @@
 import { Either } from "fp-ts/lib/Either";
 
-export enum ResultType {
-    number,
-}
-
 export type RegularResult = NumberResult;
 
-export interface NumberResult {
-    type: ResultType.number;
-    value: number;
+export class NumberResult {
+    constructor(readonly value: number) {}
 }
 
 export class ErrorResult {

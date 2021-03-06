@@ -1,20 +1,18 @@
-import { pipe } from "fp-ts/lib/function";
+import { chain, isLeft, right } from "fp-ts/lib/Either";
 import { isSome, none, Option, some } from "fp-ts/lib/Option";
-import { chain } from "fp-ts/lib/ReadonlySet";
-import { right } from "fp-ts/lib/These";
+import { pipe } from "fp-ts/lib/pipeable";
+import { validateNumber } from "./evaluator/TypeValidator";
 import {
     DivideExpression,
     Expr,
     MinusExpression,
     MultiplyExpression,
-    PlusExpression
+    PlusExpression,
 } from "./Expression";
 import { ExpressionType } from "./ExpressionType";
-import { Result } from "./Result";
+import { NumberResult, Result } from "./Result";
 
 abstract class ExpressionEvaluator {
-    validateType<T: RegularResult>(result: Result, expected: T["type"]): T {}
-
     abstract evaluate(expression: Expr, evaluator: Evalutaor): Option<Result>;
 }
 
@@ -32,22 +30,35 @@ class BinaryEvaluator extends ExpressionEvaluator {
         super();
     }
 
+    private evaluateSome(
+        expression: BinaryOperator,
+        evaluator: Evalutaor
+    ): Result {
+        const lhs = pipe(
+            evaluator.evaluate(expression.left),
+            chain(validateNumber)
+        );
+        const rhs = pipe(
+            evaluator.evaluate(expression.right),
+            chain(validateNumber)
+        );
+        if (isLeft(lhs)) {
+            return lhs;
+        }
+        if (isLeft(rhs)) {
+            return rhs;
+        }
+        return right(
+            new NumberResult(this.apply(lhs.right.value, rhs.right.value))
+        );
+    }
+
     evaluate(expression: Expr, evaluator: Evalutaor): Option<Result> {
         if (expression.type !== this.type) {
             return none;
         }
         const binaryExpression = (expression as any) as BinaryOperator;
-        return some(
-            pipe(
-                evaluator.evaluate(binaryExpression.left),
-                chain((lhs) =>
-                    pipe(
-                        evaluator.evaluate(binaryExpression.right),
-                        chain((rhs) => right(rhs))
-                    )
-                )
-            )
-        );
+        return some(this.evaluateSome(binaryExpression, evaluator));
     }
 }
 
