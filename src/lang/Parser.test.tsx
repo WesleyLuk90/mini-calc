@@ -1,4 +1,4 @@
-import { Factory } from "./Factory";
+import { Factory } from "./parse/Factory";
 import { Parser } from "./Parser";
 
 describe("Parser", () => {

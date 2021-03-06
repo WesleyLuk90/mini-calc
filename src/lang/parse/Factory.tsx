@@ -1,10 +1,10 @@
 import {
-    NumberExpression,
-    PlusExpression,
+    DivideExpression,
     Expr,
     MinusExpression,
     MultiplyExpression,
-    DivideExpression,
+    NumberExpression,
+    PlusExpression,
 } from "./Expression";
 import { ExpressionType } from "./ExpressionType";
 

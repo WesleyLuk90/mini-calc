@@ -1,20 +1,18 @@
 import { chain, isLeft, right } from "fp-ts/lib/Either";
-import { isSome, none, Option, some } from "fp-ts/lib/Option";
+import { none, Option, some } from "fp-ts/lib/Option";
 import { pipe } from "fp-ts/lib/pipeable";
-import { validateNumber } from "./evaluator/TypeValidator";
 import {
     DivideExpression,
     Expr,
     MinusExpression,
     MultiplyExpression,
     PlusExpression,
-} from "./Expression";
-import { ExpressionType } from "./ExpressionType";
+} from "../parse/Expression";
+import { ExpressionType } from "../parse/ExpressionType";
+import { Evaluator } from "./Evaluator";
+import { ExpressionEvaluator } from "./ExpressionEvaluator";
 import { NumberResult, Result } from "./Result";
-
-abstract class ExpressionEvaluator {
-    abstract evaluate(expression: Expr, evaluator: Evalutaor): Option<Result>;
-}
+import { validateNumber } from "./TypeValidator";
 
 type BinaryOperator =
     | PlusExpression
@@ -22,7 +20,7 @@ type BinaryOperator =
     | DivideExpression
     | MultiplyExpression;
 
-class BinaryEvaluator extends ExpressionEvaluator {
+export class BinaryEvaluator extends ExpressionEvaluator {
     constructor(
         readonly type: ExpressionType,
         readonly apply: (left: number, right: number) => number
@@ -32,7 +30,7 @@ class BinaryEvaluator extends ExpressionEvaluator {
 
     private evaluateSome(
         expression: BinaryOperator,
-        evaluator: Evalutaor
+        evaluator: Evaluator
     ): Result {
         const lhs = pipe(
             evaluator.evaluate(expression.left),
@@ -53,31 +51,11 @@ class BinaryEvaluator extends ExpressionEvaluator {
         );
     }
 
-    evaluate(expression: Expr, evaluator: Evalutaor): Option<Result> {
+    evaluate(expression: Expr, evaluator: Evaluator): Option<Result> {
         if (expression.type !== this.type) {
             return none;
         }
         const binaryExpression = (expression as any) as BinaryOperator;
         return some(this.evaluateSome(binaryExpression, evaluator));
-    }
-}
-
-export class Evalutaor {
-    evaluators: ExpressionEvaluator[] = [
-        new BinaryEvaluator(ExpressionType.plus, (l, r) => l + r),
-        new BinaryEvaluator(ExpressionType.minus, (l, r) => l - r),
-        new BinaryEvaluator(ExpressionType.divide, (l, r) => l / r),
-        new BinaryEvaluator(ExpressionType.multiply, (l, r) => l * r),
-    ];
-    evaluate(expression: Expr): Result {
-        const value = this.evaluators
-            .map((e) => e.evaluate(expression, this))
-            .filter(isSome)[0];
-        if (value === null) {
-            throw new Error(
-                `No evaluator for expression type ${expression.type}`
-            );
-        }
-        return value.value;
     }
 }

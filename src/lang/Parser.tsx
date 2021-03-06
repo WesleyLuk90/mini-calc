@@ -1,6 +1,6 @@
 import peg from "pegjs";
-import { Expr } from "./Expression";
-import { language } from "./Language";
+import { Expr } from "./parse/Expression";
+import { language } from "./parse/Language";
 
 export class Parser {
     private parser = peg.generate(language);
