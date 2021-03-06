@@ -1,9 +1,55 @@
-import { Language } from "./Language";
+import { Expr } from "./Expression";
+import { ExpressionType } from "./ExpressionType";
+import { Factory } from "./Factory";
 import { Parser } from "./Parser";
 
 describe("Parser", () => {
-    it("should bar", () => {
-        const parser = new Parser();
-        parser.parse(`1 + 2 * 3 / 4`);
+    const parser = new Parser();
+    it("parse arithmetic operators", () => {
+        expect(parser.parse(`1 + 2 * 3 / 4 - 5`)).toEqual(
+            Factory.plus(
+                Factory.number(1),
+                Factory.minus(
+                    Factory.multiply(
+                        Factory.number(2),
+                        Factory.divide(Factory.number(3), Factory.number(4))
+                    ),
+                    Factory.number(5)
+                )
+            )
+        );
+    });
+
+    it("parse with same presidence", () => {
+        expect(parser.parse(`1 + 2 - 3 + 4`)).toEqual(
+            Factory.plus(
+                Factory.number(1),
+                Factory.plus(
+                    Factory.minus(Factory.number(2), Factory.number(3)),
+                    Factory.number(4)
+                )
+            )
+        );
+        expect(parser.parse(`1 * 2 / 3 * 4`)).toEqual(
+            Factory.multiply(
+                Factory.number(1),
+                Factory.multiply(
+                    Factory.divide(Factory.number(2), Factory.number(3)),
+                    Factory.number(4)
+                )
+            )
+        );
+        expect(parser.parse(`1 - 2 - 3`)).toEqual(
+            Factory.minus(
+                Factory.minus(Factory.number(1), Factory.number(2)),
+                Factory.number(3)
+            )
+        );
+        expect(parser.parse(`1 / 2 / 3`)).toEqual(
+            Factory.divide(
+                Factory.divide(Factory.number(1), Factory.number(2)),
+                Factory.number(3)
+            )
+        );
     });
 });
