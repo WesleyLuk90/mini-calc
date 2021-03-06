@@ -1,9 +1,14 @@
+import { chain, fold, right } from "fp-ts/lib/Either";
+import { pipe } from "fp-ts/lib/pipeable";
 import React, { useState } from "react";
 import { Form } from "react-bootstrap";
 import "./ExpressionSection.css";
+import { Evaluator } from "./lang/evaluate/Evaluator";
+import { NumberResult, Result } from "./lang/evaluate/Result";
+import { ParserInstance } from "./ParserInstance";
 
 export function ExpressionSection() {
-    const [expr, setExpr] = useState("");
+    const [result, setResult] = useState<Result>(right(new NumberResult(0)));
     const [editExpr, setEditExpr] = useState("");
 
     return (
@@ -16,11 +21,27 @@ export function ExpressionSection() {
                     placeholder="Expression"
                     value={editExpr}
                     onChange={(e) => setEditExpr(e.target.value)}
-                    onBlur={() => setExpr(editExpr)}
+                    onBlur={() =>
+                        setResult(
+                            pipe(
+                                ParserInstance.parse(editExpr),
+                                chain((e) => new Evaluator().evaluate(e))
+                            )
+                        )
+                    }
                 />
             </Form.Group>
             <Form.Group>
-                <Form.Control placeholder="Value" value={expr} />
+                <Form.Control
+                    placeholder="Value"
+                    value={pipe(
+                        result,
+                        fold(
+                            (e) => `Error: ${e.message}`,
+                            (v) => `${v.value}`
+                        )
+                    )}
+                />
             </Form.Group>
         </div>
     );

@@ -5,10 +5,10 @@ import { Parser } from "./Parser";
 describe("Parser", () => {
     const parser = new Parser();
     it("parse arithmetic operators", () => {
-        expect(parser.parse(`1 + 2 * 3 / 4 - 5`)).toEqual(
+        expect(parser.parse(`10 + 2 * 3 / 4 - 5`)).toEqual(
             right(
                 Factory.plus(
-                    Factory.number(1),
+                    Factory.number(10),
                     Factory.minus(
                         Factory.multiply(
                             Factory.number(2),
@@ -44,11 +44,11 @@ describe("Parser", () => {
                 )
             )
         );
-        expect(parser.parse(`1 - 2 - 3`)).toEqual(
+        expect(parser.parse(`1 - 2 - - 3`)).toEqual(
             right(
                 Factory.minus(
                     Factory.minus(Factory.number(1), Factory.number(2)),
-                    Factory.number(3)
+                    Factory.number(-3)
                 )
             )
         );

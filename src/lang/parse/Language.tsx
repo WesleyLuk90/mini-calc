@@ -26,7 +26,7 @@ unit_expr
 
 identifier = identifier:[a-zA-Z][a-zA-Z0-9]*
 
-integer = integer:[0-9]+ { return { type: "number", value: parseInt(integer, 10) } }
+integer = negative:("-"?) sp integer:[0-9]+ { return { type: "number", value: parseInt(integer.join(""), 10) * (negative != null ? -1 : 1) } }
 
 function_call
     = identifier sp "(" sp ")"
